@@ -1,4 +1,4 @@
-import { React, useState } from 'react';
+import { React, useState, useEffect } from 'react';
 import Grid from '@mui/material/Unstable_Grid2';
 
 import List from '@mui/material/List';
@@ -10,6 +10,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 import FormControl from '@mui/material/FormControl';
 
 import TodoItem from './TodoItem';
+import ProgressBar from './ProgressBar';
 
 export default function Todo() {
 	const [items, setItems] = useState([
@@ -24,6 +25,18 @@ export default function Todo() {
 			complete: false,
 			paused: false,
 			id: 999,
+		},
+		{
+			name: 'Workout',
+			complete: false,
+			paused: false,
+			id: 99529,
+		},
+		{
+			name: 'Dr office',
+			complete: false,
+			paused: false,
+			id: 99252,
 		},
 	]);
 
@@ -79,6 +92,7 @@ export default function Todo() {
 				return {
 					...item,
 					complete: true,
+					paused: false,
 				};
 			}
 			return item;
@@ -87,10 +101,29 @@ export default function Todo() {
 		setItems(updatedItems);
 	};
 
+	const calculateProgress = () => {
+		const complete = items.filter((item) => item.complete);
+		const paused = items.filter((item) => item.paused);
+
+		setComplete(complete.length / items.length);
+		setPaused(
+			paused.length / items.length + complete.length / items.length
+		);
+	};
+
+	const [paused, setPaused] = useState(0);
+	const [complete, setComplete] = useState(0);
+
+	useEffect(() => {
+		calculateProgress();
+	});
+
 	return (
 		<Grid container spacing={0} minHeight={160} direction="column">
 			<Grid item justifyContent="center" alignItems="center">
 				<h1>ToDo App</h1>
+				<ProgressBar completed={complete} paused={paused} />
+				<br />
 				<FormControl
 					sx={{ m: 1, width: '25ch' }}
 					variant="outlined"
@@ -123,13 +156,43 @@ export default function Todo() {
 			>
 				<List>
 					{items.map((item) => {
-						return (
-							<TodoItem
-								key={item.id}
-								item={item}
-								handleUpdate={handleUpdate}
-							/>
-						);
+						if (!item.complete && !item.paused) {
+							return (
+								<TodoItem
+									key={item.id}
+									item={item}
+									handleUpdate={handleUpdate}
+								/>
+							);
+						}
+					})}
+				</List>
+				<List>
+					<h1>Paused</h1>
+					{items.map((item) => {
+						if (item.paused) {
+							return (
+								<TodoItem
+									key={item.id}
+									item={item}
+									handleUpdate={handleUpdate}
+								/>
+							);
+						}
+					})}
+				</List>
+				<List>
+					<h1>Complete</h1>
+					{items.map((item) => {
+						if (item.complete) {
+							return (
+								<TodoItem
+									key={item.id}
+									item={item}
+									handleUpdate={handleUpdate}
+								/>
+							);
+						}
 					})}
 				</List>
 			</Grid>
